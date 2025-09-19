@@ -30,6 +30,7 @@ uint16_t copy_paste_timer;
 enum layers {
     _COLEMAK_DH = 0,
     _QWERTY,
+    _GAME,
     _NUM,
     _NAV,
     _SYM,
@@ -97,6 +98,26 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
                                KC_LGUI, KC_LALT,   NUM  , LT(_FUNC, KC_SPC), KC_ENT ,     KC_BSPC,LT(_NAV, KC_SPC), SYM , KC_TAB , KC_APP
     ),
 /*
+ * Base Layer: Game
+ *
+ * ,-------------------------------------------.                              ,-------------------------------------------.
+ * | Grave  |   Q  |   T  |   F  |   R  |   B  |                              |   Y  |   U  |   I  |   O  |  P   |  | \   |
+ * |--------+------+------+------+------+------|                              |------+------+------+------+------+--------|
+ * | LShift |   C  |   A  |   W  |   D  |   E  |                              |   H  |   J  |   K  |   L  | ; :  |   ' "  |
+ * |--------+------+------+------+------+------+-------------.  ,-------------+------+------+------+------+------+--------|
+ * | LCtrl  |   Z  |   X  |   S  |   G  |   V  | CCCV | Esc  |  | Del  | Lead |   N  |   M  | ,  < | . >  | /  ? |  - _   |
+ * `----------------------+------+------+------+------+------|  |------+------+------+------+------+----------------------'
+ *                        | LGUI | LAlt | Num  | Space| Enter|  | Bspc | Space| Sym  | Tab  | Enc  |
+ *                        | /Enc |      |      | /Func|      |  |      | /Nav |      |      |      |
+ *                        `----------------------------------'  `----------------------------------'
+ */
+    [_GAME] = LAYOUT(
+    KC_GRV  , KC_Q ,  KC_T   ,  KC_F  ,   KC_R ,   KC_B ,                                                          KC_J,   KC_L ,  KC_U ,  KC_Y  ,KC_SCLN, KC_BSLS,
+    KC_LSFT , KC_C ,  KC_A   ,  KC_W  ,   KC_D ,   KC_E ,                                                          KC_M,   KC_N ,  KC_E ,  KC_I  ,  KC_O , KC_QUOT,
+    KC_LCTL , KC_Z ,  KC_X   ,  KC_S  ,   KC_G ,   KC_V , LT(0,KC_NO)      , KC_ESC ,     KC_DEL ,  QK_LEAD      , KC_K,   KC_H ,KC_COMM, KC_DOT ,KC_SLSH, KC_MINS,
+                               KC_LGUI, KC_LALT,   NUM  , MT(_FUNC, KC_SPC), KC_ENT ,     KC_BSPC,MT(_NAV, KC_SPC), SYM , KC_TAB , KC_APP
+    ),
+/*
  * Function Layer: Function keys
  *
  * ,-------------------------------------------.                              ,-------------------------------------------.
@@ -131,7 +152,7 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
  *                        `----------------------------------'  `----------------------------------'
  */
     [_NAV] = LAYOUT(
-    _______, QWERTY , COLEMAK, _______, _______, _______,                                     KC_PGUP, KC_HOME, KC_UP,   KC_END,  KC_VOLU, KC_DEL,
+    KC_CYCLE_LAYERS, _______, _______, _______, _______, _______,                                     KC_PGUP, KC_HOME, KC_UP,   KC_END,  KC_VOLU, KC_DEL,
     KC_CAPS, KC_LGUI, KC_LALT, KC_LCTL, KC_LSFT, _______,                                     KC_PGDN, KC_LEFT, KC_DOWN, KC_RGHT, KC_VOLD, KC_INS,
     _______, _______, _______, _______, _______, _______, _______, KC_SCRL, _______, _______,KC_PAUSE, KC_MPRV, KC_MPLY, KC_MNXT, KC_MUTE, KC_PSCR,
                                _______, _______, _______, _______, _______, _______, _______, _______, _______, _______
@@ -198,18 +219,52 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
 //     ),
 };
 
+// Define the keycode, `QK_USER` avoids collisions with existing keycodes
+enum keycodes {
+  KC_CYCLE_LAYERS = QK_USER,
+};
+
+// 1st layer on the cycle
+#define LAYER_CYCLE_START 0 // Colemak
+// Last layer on the cycle
+#define LAYER_CYCLE_END   2 // Game
+
 // single key copy/paste
 bool process_record_user(uint16_t keycode, keyrecord_t *record) {
     switch (keycode) {
         case LT(0,KC_NO):
             if (record->tap.count && record->event.pressed) {
-                tap_code16(C(KC_V)); // Intercept tap function to send Ctrl-C
+                tap_code16(C(KC_C)); // Intercept tap function to send Ctrl-C
             } else if (record->event.pressed) {
-                tap_code16(C(KC_C)); // Intercept hold function to send Ctrl-V
+                tap_code16(C(KC_V)); // Intercept hold function to send Ctrl-V
             }
             return false;
+
+        case KC_CYCLE_LAYERS:
+            // Our logic will happen on presses, nothing is done on releases
+            if (!record->event.pressed) {
+                // We've already handled the keycode (doing nothing), let QMK know so no further code is run unnecessarily
+                return false;
+            }
+
+            uint8_t current_layer = get_highest_layer(layer_state);
+
+            // Check if we are within the range, if not quit
+            if (current_layer > LAYER_CYCLE_END || current_layer < LAYER_CYCLE_START) {
+                return false;
+            }
+
+            uint8_t next_layer = current_layer + 1;
+            if (next_layer > LAYER_CYCLE_END) {
+                next_layer = LAYER_CYCLE_START;
+            }
+            layer_move(next_layer);
+            return false;
+
+        // Process other keycodes normally
+        default:
+            return true;
     }
-    return true;
 }
 
 #ifdef OLED_ENABLE

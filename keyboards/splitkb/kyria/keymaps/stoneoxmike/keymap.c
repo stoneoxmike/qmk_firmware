@@ -37,9 +37,20 @@ enum layers {
     _FUNC,
 };
 
+// Define the keycode, `QK_USER` avoids collisions with existing keycodes
+enum keycodes {
+  KC_CYCLE_LAYERS = QK_USER,
+};
+
+// 1st layer on the cycle
+#define LAYER_CYCLE_START 0 // Colemak
+// Last layer on the cycle
+#define LAYER_CYCLE_END   2 // Game
+
 // Aliases for readability
 #define COLEMAK DF(_COLEMAK_DH)
 #define QWERTY  DF(_QWERTY)
+// #define GAME    DF(_GAME)
 #define NUM     TT(_NUM)
 #define SYM     TT(_SYM)
 // #define NAV     MO(_NAV)
@@ -75,7 +86,7 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
     KC_GRV  , KC_Q ,  KC_W   ,  KC_F  ,   KC_P ,   KC_B ,                                                          KC_J,   KC_L ,  KC_U ,  KC_Y  ,KC_SCLN, KC_BSLS,
     KC_LSFT , KC_A ,  KC_R   ,  KC_S  ,   KC_T ,   KC_G ,                                                          KC_M,   KC_N ,  KC_E ,  KC_I  ,  KC_O , KC_QUOT,
     KC_LCTL , KC_Z ,  KC_X   ,  KC_C  ,   KC_D ,   KC_V , LT(0,KC_NO)      , KC_ESC ,     KC_DEL ,  QK_LEAD      , KC_K,   KC_H ,KC_COMM, KC_DOT ,KC_SLSH, KC_MINS,
-                               KC_LGUI, KC_LALT,   NUM  , LT(_FUNC, KC_SPC), KC_ENT ,     KC_BSPC,LT(_NAV, KC_SPC),SYM , KC_TAB , KC_RALT
+                               KC_LGUI, KC_LALT,   NUM  , LT(_FUNC, KC_SPC), KC_ENT ,     KC_BSPC,LT(_NAV, KC_SPC),SYM , KC_TAB , KC_CYCLE_LAYERS
     ),
 /*
  * Base Layer: QWERTY
@@ -92,10 +103,10 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
  *                        `----------------------------------'  `----------------------------------'
  */
     [_QWERTY] = LAYOUT(
-    KC_GRV  , KC_Q ,  KC_W   ,  KC_F  ,   KC_P ,   KC_B ,                                                          KC_J,   KC_L ,  KC_U ,  KC_Y  ,KC_SCLN, KC_BSLS,
-    KC_LSFT , KC_A ,  KC_R   ,  KC_S  ,   KC_T ,   KC_G ,                                                          KC_M,   KC_N ,  KC_E ,  KC_I  ,  KC_O , KC_QUOT,
-    KC_LCTL , KC_Z ,  KC_X   ,  KC_C  ,   KC_D ,   KC_V , LT(0,KC_NO)      , KC_ESC ,     KC_DEL ,  QK_LEAD      , KC_K,   KC_H ,KC_COMM, KC_DOT ,KC_SLSH, KC_MINS,
-                               KC_LGUI, KC_LALT,   NUM  , LT(_FUNC, KC_SPC), KC_ENT ,     KC_BSPC,LT(_NAV, KC_SPC), SYM , KC_TAB , KC_APP
+    KC_GRV  , KC_Q ,  KC_W   ,  KC_E  ,   KC_R ,   KC_T ,                                                          KC_Y,   KC_U ,  KC_I ,  KC_O  , KC_P  , KC_BSLS,
+    KC_LSFT , KC_A ,  KC_S   ,  KC_D  ,   KC_F ,   KC_G ,                                                          KC_H,   KC_J ,  KC_K ,  KC_L  ,KC_SCLN, KC_QUOT,
+    KC_LCTL , KC_Z ,  KC_X   ,  KC_C  ,   KC_V ,   KC_B , LT(0,KC_NO)      , KC_ESC ,     KC_DEL ,  QK_LEAD      , KC_N,   KC_M ,KC_COMM, KC_DOT ,KC_SLSH, KC_MINS,
+                               KC_LGUI, KC_LALT,   NUM  , LT(_FUNC, KC_SPC), KC_ENT ,     KC_BSPC,LT(_NAV, KC_SPC), SYM , KC_TAB , KC_CYCLE_LAYERS
     ),
 /*
  * Base Layer: Game
@@ -115,7 +126,7 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
     KC_GRV  , KC_Q ,  KC_T   ,  KC_F  ,   KC_R ,   KC_B ,                                                          KC_J,   KC_L ,  KC_U ,  KC_Y  ,KC_SCLN, KC_BSLS,
     KC_LSFT , KC_C ,  KC_A   ,  KC_W  ,   KC_D ,   KC_E ,                                                          KC_M,   KC_N ,  KC_E ,  KC_I  ,  KC_O , KC_QUOT,
     KC_LCTL , KC_Z ,  KC_X   ,  KC_S  ,   KC_G ,   KC_V , LT(0,KC_NO)      , KC_ESC ,     KC_DEL ,  QK_LEAD      , KC_K,   KC_H ,KC_COMM, KC_DOT ,KC_SLSH, KC_MINS,
-                               KC_LGUI, KC_LALT,   NUM  , MT(_FUNC, KC_SPC), KC_ENT ,     KC_BSPC,MT(_NAV, KC_SPC), SYM , KC_TAB , KC_APP
+                               KC_LGUI, KC_LALT,   NUM  , MT(_FUNC, KC_SPC), KC_ENT ,     KC_BSPC,MT(_NAV, KC_SPC), SYM , KC_TAB , KC_CYCLE_LAYERS
     ),
 /*
  * Function Layer: Function keys
@@ -152,7 +163,7 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
  *                        `----------------------------------'  `----------------------------------'
  */
     [_NAV] = LAYOUT(
-    KC_CYCLE_LAYERS, _______, _______, _______, _______, _______,                                     KC_PGUP, KC_HOME, KC_UP,   KC_END,  KC_VOLU, KC_DEL,
+    _______, _______, _______, _______, _______, _______,                                     KC_PGUP, KC_HOME, KC_UP,   KC_END,  KC_VOLU, KC_DEL,
     KC_CAPS, KC_LGUI, KC_LALT, KC_LCTL, KC_LSFT, _______,                                     KC_PGDN, KC_LEFT, KC_DOWN, KC_RGHT, KC_VOLD, KC_INS,
     _______, _______, _______, _______, _______, _______, _______, KC_SCRL, _______, _______,KC_PAUSE, KC_MPRV, KC_MPLY, KC_MNXT, KC_MUTE, KC_PSCR,
                                _______, _______, _______, _______, _______, _______, _______, _______, _______, _______
@@ -219,24 +230,14 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
 //     ),
 };
 
-// Define the keycode, `QK_USER` avoids collisions with existing keycodes
-enum keycodes {
-  KC_CYCLE_LAYERS = QK_USER,
-};
-
-// 1st layer on the cycle
-#define LAYER_CYCLE_START 0 // Colemak
-// Last layer on the cycle
-#define LAYER_CYCLE_END   2 // Game
-
 // single key copy/paste
 bool process_record_user(uint16_t keycode, keyrecord_t *record) {
     switch (keycode) {
         case LT(0,KC_NO):
             if (record->tap.count && record->event.pressed) {
-                tap_code16(C(KC_C)); // Intercept tap function to send Ctrl-C
+                tap_code16(C(KC_V)); // Intercept tap function to send Ctrl-V
             } else if (record->event.pressed) {
-                tap_code16(C(KC_V)); // Intercept hold function to send Ctrl-V
+                tap_code16(C(KC_C)); // Intercept hold function to send Ctrl-C
             }
             return false;
 
@@ -289,6 +290,9 @@ static void render_status(void) {
             break;
         case _QWERTY:
             oled_write_P(PSTR("QWERTY"), false);
+            break;
+        case _GAME:
+            oled_write_P(PSTR("GAME"), false);
             break;
         case _NUM :
             oled_write_P(PSTR("NUM"), false);
